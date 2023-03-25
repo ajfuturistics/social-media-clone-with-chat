@@ -146,7 +146,7 @@ const Auth = () => {
           </div>
           <button
             disabled={loading}
-            className="custom-btn w-24 h-8 self-end disabled:bg-slate-300 disabled:pointer-events-none"
+            className="custom-btn w-24 h-8 self-end"
             type="submit"
           >
             {loading ? "Loading..." : isSignup ? "Signup" : "Login"}

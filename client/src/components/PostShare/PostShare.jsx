@@ -2,18 +2,55 @@ import React, { useState, useRef } from "react";
 import profileImg from "../../img/profileImg.jpg";
 import { BiImage, BiPlayCircle, BiCalendar, BiXCircle } from "react-icons/bi";
 import { MdOutlineLocationOn } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { uploadImage, uploadPost } from "../../redux/actions/uploadActions";
 
 const PostShare = () => {
   const [image, setImage] = useState(null);
   const imageRef = useRef();
+  const descRef = useRef();
+
+  const { uploading } = useSelector((state) => state.post);
+  const { user } = useSelector((state) => state.auth.authData);
+  const dispatch = useDispatch();
 
   const onImageChange = (e) => {
     if (e.target.files || e.target.files[0]) {
       let img = e.target.files[0];
-      setImage({
-        image: URL.createObjectURL(img),
-      });
+      setImage(img);
     }
+  };
+
+  const reset = () => {
+    setImage(null);
+    descRef.current.value = "";
+  };
+
+  const handleSharePost = (e) => {
+    e.preventDefault();
+
+    const newPost = {
+      userId: user?._id,
+      desc: descRef.current.value,
+    };
+
+    if (image) {
+      const data = new FormData();
+      const fileName = Date.now() + "-" + image.name;
+
+      data.append("name", fileName);
+      data.append("file", image);
+      newPost.image = fileName;
+
+      try {
+        dispatch(uploadImage(data));
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    dispatch(uploadPost(newPost));
+    reset();
   };
 
   return (
@@ -28,6 +65,8 @@ const PostShare = () => {
           type="text"
           placeholder="What's happening"
           className="bg-[#28343e11] rounded-xl p-3 text-base border-none outline-none"
+          ref={descRef}
+          required
         />
         <div className="postOptions flex justify-around pt-2">
           <div
@@ -49,7 +88,13 @@ const PostShare = () => {
             <BiCalendar size={28} />
             Schedule
           </div>
-          <button className="custom-btn p-1 px-5">Share</button>
+          <button
+            disabled={uploading}
+            className="custom-btn p-1 px-5"
+            onClick={handleSharePost}
+          >
+            {uploading ? "Uploading..." : "Share"}
+          </button>
           <div className="hidden">
             <input
               type="file"
@@ -67,7 +112,7 @@ const PostShare = () => {
               className="absolute right-4 top-2 hover:cursor-pointer text-red-500"
             />
             <img
-              src={image?.image}
+              src={URL.createObjectURL(image)}
               alt="seleted-img"
               className="w-full max-h-[20rem] object-cover rounded-lg"
             />

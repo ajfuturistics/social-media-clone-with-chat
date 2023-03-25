@@ -35,6 +35,6 @@ body {
 
 @layer components {
   .custom-btn {
-    @apply flex justify-center items-center text-white font-semibold border-none rounded-lg bg-rose-500 transition-all hover:cursor-pointer hover:text-rose-500 hover:bg-transparent hover:border-2 hover:border-solid hover:border-rose-500;
+    @apply flex justify-center items-center text-white font-semibold border-none rounded-lg bg-rose-500 transition-all hover:cursor-pointer hover:text-rose-500 hover:bg-transparent hover:border-2 hover:border-solid hover:border-rose-500 disabled:bg-slate-300 disabled:pointer-events-none;
   }
 }
