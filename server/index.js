@@ -12,6 +12,10 @@ import UploadRoutes from "./Routes/UploadRoutes.js";
 
 const app = express();
 
+// to serve images from public
+app.use(express.static("public"));
+app.use("/images", express.static("images"));
+
 dotenv.config();
 
 // Middlewares

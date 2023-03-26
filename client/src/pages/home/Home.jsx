@@ -6,7 +6,7 @@ import RightSide from "../../components/RightSide/RightSide";
 const Home = () => {
   return (
     <div className="Home relative grid grid-cols-[18rem_auto_20rem] gap-4 px-2">
-      <ProfileSide />
+      <ProfileSide location="homepage" />
       <PostSide />
       <RightSide />
     </div>

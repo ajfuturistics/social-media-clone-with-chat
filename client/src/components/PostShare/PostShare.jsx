@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import profileImg from "../../img/profileImg.jpg";
 import { BiImage, BiPlayCircle, BiCalendar, BiXCircle } from "react-icons/bi";
 import { MdOutlineLocationOn } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -56,7 +55,11 @@ const PostShare = () => {
   return (
     <div className="postShare flex gap-4 bg-[#ffffffa3] p-4 rounded-2xl">
       <img
-        src={profileImg}
+        src={
+          user?.profilePic
+            ? process.env.REACT_APP_PUBLIC_FOLDER + user?.profilePic
+            : process.env.REACT_APP_PUBLIC_FOLDER + "defaultProfile.png"
+        }
         alt="post-profile"
         className="rounded-full w-12 h-12"
       />
