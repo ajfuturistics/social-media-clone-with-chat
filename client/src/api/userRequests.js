@@ -1,4 +1,19 @@
-import { API } from "./api";
+import axios from "axios";
+
+export const API = axios.create({ baseURL: "http://localhost:5000" });
+
+API.interceptors.request.use(
+  (req) => {
+    if (localStorage.getItem("profile")) {
+      let token = JSON.parse(localStorage.getItem("profile")).token;
+      req.headers.Authorization = `Bearer ${token}`;
+    }
+    return req;
+  },
+  (error) => {
+    console.log(error);
+  }
+);
 
 export const getUser = (userId) => API.get(`/user/${userId}`);
 
