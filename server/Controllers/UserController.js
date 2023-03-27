@@ -18,6 +18,16 @@ export const getUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// get all users
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find({}).select("-password"); // "-password for not showing password"
+
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const updateUser = async (req, res) => {
   const id = req.params.id;
@@ -77,7 +87,7 @@ export const deleteUser = async (req, res) => {
 // Follow user
 export const followUser = async (req, res) => {
   const id = req.params.id;
-  const { currentUserId } = req.body;
+  const { _id: currentUserId } = req.body;
 
   if (currentUserId === id) {
     return res.status(403).json({ message: "Action forbidden" });
@@ -103,7 +113,7 @@ export const followUser = async (req, res) => {
 // Unfollow user
 export const unfollowUser = async (req, res) => {
   const id = req.params.id;
-  const { currentUserId } = req.body;
+  const { _id: currentUserId } = req.body;
 
   if (currentUserId === id) {
     return res.status(403).json({ message: "Action forbidden" });

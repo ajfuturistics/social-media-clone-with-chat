@@ -1,28 +1,37 @@
-import React from "react";
-import { Followers } from "../../Data/FollowersData";
+import React, { useEffect, useState } from "react";
+// import { Followers } from "../../Data/FollowersData";
+import FollowUser from "../FollowUser/FollowUser";
+import { getAllUsers } from "../../api/userRequests";
+import { useSelector } from "react-redux";
 
 const FollowersCard = () => {
+  const [persons, setPersons] = useState([]);
+
+  const { user } = useSelector((state) => state.auth.authData);
+
+  const fetchPersons = async () => {
+    try {
+      const { data } = await getAllUsers();
+      setPersons(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPersons();
+  }, []);
+
   return (
     <div className="FollowersCard w-full rounded-xl gap-4 flex flex-col text-sm">
       <h3 className="font-bold text-lg">Who is following you</h3>
 
-      {Followers.map((follower, idx) => {
-        return (
-          <div className="follower flex justify-between" key={idx}>
-            <div className="flex gap-3">
-              <img
-                src={follower.img}
-                alt={`${follower.name}_img`}
-                className="followerImg w-[3.2rem] h-[3.2rem] rounded-full"
-              />
-              <div className="name flex flex-col items-start justify-center">
-                <span className="font-semibold">{follower.name}</span>
-                <span>@{follower.username}</span>
-              </div>
-            </div>
-            <button className="custom-btn h-8 px-5">Follow</button>
-          </div>
-        );
+      {persons.map((person) => {
+        if (person._id !== user._id) {
+          return <FollowUser key={person._id} person={person} />;
+        } else {
+          return undefined;
+        }
       })}
     </div>
   );
