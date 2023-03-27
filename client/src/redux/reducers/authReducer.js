@@ -1,6 +1,7 @@
 const initialState = {
   authData: null,
   loading: false,
+  updateLoading: false,
   error: false,
 };
 
@@ -23,6 +24,33 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
+        error: true,
+      };
+    case "LOGOUT":
+      localStorage.clear();
+      return {
+        ...state,
+        loading: false,
+        authData: null,
+        error: false,
+      };
+    case "UPDATE_USER_START":
+      return {
+        ...state,
+        updateLoading: true,
+        error: false,
+      };
+    case "UPDATE_USER_SUCCESS":
+      localStorage.setItem("profile", JSON.stringify({ ...action?.payload }));
+      return {
+        ...state,
+        updateLoading: false,
+        authData: action.payload,
+      };
+    case "UPDATE_USER_FAIL":
+      return {
+        ...state,
+        updateLoading: false,
         error: true,
       };
     default:
