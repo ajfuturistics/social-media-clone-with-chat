@@ -9,6 +9,10 @@ import AuthRoutes from "./Routes/AuthRoutes.js";
 import UserRoutes from "./Routes/UserRoutes.js";
 import PostRoutes from "./Routes/PostRoutes.js";
 import UploadRoutes from "./Routes/UploadRoutes.js";
+import MessageRoutes from "./Routes/MessageRoutes.js";
+
+// Chat Routes
+import ChatRoutes from "./Routes/ChatRoutes.js";
 
 const app = express();
 
@@ -40,3 +44,5 @@ app.use("/auth", AuthRoutes);
 app.use("/user", UserRoutes);
 app.use("/post", PostRoutes);
 app.use("/upload", UploadRoutes);
+app.use("/chat", ChatRoutes);
+app.use("/message", MessageRoutes);
