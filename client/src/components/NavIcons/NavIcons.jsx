@@ -10,7 +10,9 @@ const NavIcons = () => {
       </Link>
       <BiCog size={30} />
       <BiBell size={30} />
-      <BiConversation size={30} />
+      <Link to="/chats">
+        <BiConversation size={30} />
+      </Link>
     </div>
   );
 };
