@@ -1,16 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { getUser } from "../../api/userRequests";
-import { getMessages } from "../../api/messageRequests";
+import { getMessages, sendMessage } from "../../api/messageRequests";
 import InputEmoji from "react-input-emoji";
-import * as timeago from "timeago.js";
+// import * as timeago from "timeago.js";
+import TimeAgo from "react-timeago";
 
-const ChatBox = ({ chat, currentUserId }) => {
+const ChatBox = ({ chat, currentUserId, setSMessage, recieveMessage }) => {
   const [userData, setUserData] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
+  const scrollRef = useRef();
+
   const handleChange = (newMessage) => {
     setNewMessage(newMessage);
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+
+    if (newMessage === "") {
+      return;
+    }
+
+    const message = {
+      senderId: currentUserId,
+      chatId: chat?._id,
+      text: newMessage,
+    };
+
+    // send message to database
+    try {
+      const { data } = await sendMessage(message);
+      setMessages([...messages, data]);
+      setNewMessage("");
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+
+    // send message to socket server
+    const recieverId = chat?.members?.find((id) => id !== currentUserId);
+    setSMessage({ ...message, recieverId });
   };
 
   const getUserData = async () => {
@@ -46,6 +77,19 @@ const ChatBox = ({ chat, currentUserId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat]);
 
+  // setting recieved message from socket
+  useEffect(() => {
+    if (recieveMessage !== null && recieveMessage.chatId === chat?._id) {
+      setMessages([...messages, recieveMessage]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recieveMessage]);
+
+  // always scroll to last message
+  useEffect(() => {
+    scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <>
       <div className="chatbox-container bg-[#ffffffa3] rounded-2xl grid grid-rows-[14vh_60vh_13vh] mt-2 ">
@@ -79,20 +123,20 @@ const ChatBox = ({ chat, currentUserId }) => {
             {/* chatbox message */}
             <div className="chat-body flex flex-col gap-2 p-6 overflow-scroll">
               {messages.map((message) => (
-                <>
-                  <div
-                    className={`bg-sky-500 text-white p-3 rounded-[1rem_1rem_1rem_0] max-w-md w-fit flex flex-col gap-2 ${
-                      message.senderId === currentUserId
-                        ? "self-end rounded-[1rem_1rem_0_1rem]"
-                        : ""
-                    }`}
-                  >
-                    <span>{message?.text}</span>
-                    <span className="text-xs self-end">
-                      {timeago.format(message?.createdAt)}
-                    </span>
-                  </div>
-                </>
+                <div
+                  key={message._id}
+                  ref={scrollRef}
+                  className={`text-white p-3 max-w-md w-fit flex flex-col gap-2 ${
+                    message.senderId === currentUserId
+                      ? "bg-sky-500 self-end rounded-[1rem_1rem_0_1rem]"
+                      : "bg-rose-500 rounded-[1rem_1rem_1rem_0]"
+                  }`}
+                >
+                  <span>{message?.text}</span>
+                  <span className="text-xs self-end">
+                    <TimeAgo date={message?.createdAt} />
+                  </span>
+                </div>
               ))}
             </div>
 
@@ -106,9 +150,12 @@ const ChatBox = ({ chat, currentUserId }) => {
                 value={newMessage}
                 onChange={handleChange}
               />
-              <div className="send-button custom-btn p-[0.2rem_0.6rem]">
+              <button
+                onClick={handleSend}
+                className="send-button custom-btn p-[0.2rem_0.6rem]"
+              >
                 Send
-              </div>
+              </button>
               <input
                 className="h-[70%] bg-[#ececec] rounded-lg border-none outline-none flex-1 text-sm p-[0px_15px_0px_15px]"
                 type="file"

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getUser } from "../../api/userRequests";
 
-const Conversation = ({ data, currentUserId }) => {
+const Conversation = ({ data, currentUserId, online }) => {
   const [userData, setUserData] = useState(null);
 
   const getUserData = async () => {
@@ -23,7 +23,9 @@ const Conversation = ({ data, currentUserId }) => {
     <>
       <div className="flex gap-4 rounded-lg p-[10px] hover:bg-[#80808038] hover:cursor-pointer">
         <div className="relative">
-          <div className="online-dot bg-[#adff2f] rounded-full absolute left-8 w-4 h-4 shadow-md"></div>
+          {online && (
+            <div className="online-dot bg-[#adff2f] rounded-full absolute left-8 w-4 h-4 shadow-md"></div>
+          )}
           <img
             className="w-[50px] h-[50px] rounded-full"
             src={
@@ -36,7 +38,7 @@ const Conversation = ({ data, currentUserId }) => {
         </div>
         <div className="name flex flex-col items-start justify-center text-sm">
           <span className="font-semibold">{`${userData?.firstname} ${userData?.lastname}`}</span>
-          <span className="">Online</span>
+          <span className="">{online ? "Online" : "Offline"}</span>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import LogoSearch from "../../components/LogoSearch/LogoSearch";
 import { useSelector } from "react-redux";
 import { userChats } from "../../api/chatRequests";
@@ -6,11 +6,19 @@ import Conversation from "../../components/Conversation/Conversation";
 import NavIcons from "../../components/NavIcons/NavIcons";
 import ChatBox from "../../components/ChatBox/ChatBox";
 
+import { io } from "socket.io-client";
+
 const Chat = () => {
   const { user } = useSelector((state) => state.auth.authData);
 
+  const socket = useRef();
+  // const socket = io();
+
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [sMessage, setSMessage] = useState(null);
+  const [recieveMessage, setRecieveMessage] = useState(null);
 
   const getChats = async () => {
     try {
@@ -21,10 +29,43 @@ const Chat = () => {
     }
   };
 
+  const checkOnlineStatus = (chat) => {
+    const chatMember = chat?.members?.find(
+      (memberId) => memberId !== user?._id
+    );
+    const online = onlineUsers.find((user) => user?.userId === chatMember);
+
+    return online ? true : false;
+  };
+
   useEffect(() => {
     getChats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Connect to Socket.io
+  useEffect(() => {
+    socket.current = io("ws://localhost:8800");
+    socket.current.emit("new-user-add", user._id);
+    socket.current.on("get-users", (users) => {
+      setOnlineUsers(users);
+    });
+  }, [user]);
+
+  // Send Message to socket server
+  useEffect(() => {
+    if (sMessage !== null) {
+      socket.current.emit("send-message", sMessage);
+    }
+  }, [sMessage]);
+
+  // Get the message from socket server
+  useEffect(() => {
+    socket.current.on("recieve-message", (data) => {
+      console.log(data);
+      setRecieveMessage(data);
+    });
+  }, []);
 
   return (
     <div className="relative grid grid-cols-[22%_auto] gap-4">
@@ -35,7 +76,11 @@ const Chat = () => {
           <div className="chat-list flex flex-col gap-4">
             {chats.map((chat) => (
               <div key={chat._id} onClick={() => setCurrentChat(chat)}>
-                <Conversation data={chat} currentUserId={user._id} />
+                <Conversation
+                  data={chat}
+                  currentUserId={user._id}
+                  online={checkOnlineStatus(chat)}
+                />
               </div>
             ))}
           </div>
@@ -47,7 +92,12 @@ const Chat = () => {
         </div>
 
         {/* chat body */}
-        <ChatBox chat={currentChat} currentUserId={user?._id} />
+        <ChatBox
+          chat={currentChat}
+          currentUserId={user?._id}
+          setSMessage={setSMessage}
+          recieveMessage={recieveMessage}
+        />
       </div>
     </div>
   );
